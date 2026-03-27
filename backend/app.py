@@ -29,29 +29,35 @@ engine = create_engine(
     connect_args={"sslmode": "require"}
 )
 
-# Create leads table
-with engine.connect() as conn:
-    conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS leads (
-            id SERIAL PRIMARY KEY,
-            name TEXT,
-            email TEXT,
-            message TEXT
-        )
-    """))
-    conn.commit()
+def init_db():
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS leads (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT,
+                    email TEXT,
+                    message TEXT
+                )
+            """))
 
-# Create tool history table
-with engine.connect() as conn:
-    conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS tool_history (
-            id SERIAL PRIMARY KEY,
-            tool_name TEXT,
-            original_file TEXT,
-            output_file TEXT
-        )
-    """))
-    conn.commit()
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS tool_history (
+                    id SERIAL PRIMARY KEY,
+                    tool_name TEXT,
+                    original_file TEXT,
+                    output_file TEXT,
+                    user_email TEXT,
+                    user_name TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+
+            conn.commit()
+    except Exception as e:
+        print("DB init skipped:", e)
+
+init_db()
 
 UPLOAD_FOLDER = "uploads"
 OUTPUT_FOLDER = "outputs"
@@ -404,6 +410,5 @@ def download_output(filename):
         return jsonify({"error": str(e)}), 404
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
