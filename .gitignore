@@ -1,0 +1,27 @@
+# Environment files (VERY IMPORTANT)
+.env
+.env.local
+
+# Python
+venv/
+__pycache__/
+
+# Backend temp files
+uploads/
+outputs/
+
+# Node / frontend
+node_modules/
+.next/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+*.zip
+temporarily.js
+frontend/7.5.0
+frontend/frontend@0.1.0
+frontend/next
+frontend/npm
+frontend/npx
