@@ -225,17 +225,15 @@ def excel_metadata():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-
 @app.route('/remove-duplicates', methods=['POST'])
 def remove_duplicates():
     temp_file = request.form.get("temp_file")
     sheet_name = request.form.get("sheet_name")
-    action_type = request.form.get("action_type")   # highlight or delete
+    action_type = request.form.get("action_type")
     mode = request.form.get("mode")
-    selected_column = request.form.get("selected_column")                 # row or column
+    selected_column = request.form.get("selected_column")
     user_email = request.form.get("user_email", "")
     user_name = request.form.get("user_name", "")
-    
 
     if not temp_file:
         return jsonify({"error": "Missing temp file"}), 400
@@ -287,7 +285,6 @@ def remove_duplicates():
 
                 yellow_fill = PatternFill(start_color="FFF59D", end_color="FFF59D", fill_type="solid")
 
-                # pandas row index starts at 0; excel row starts at 2 because row 1 is header
                 for idx, is_dup in enumerate(duplicate_mask.tolist(), start=2):
                     if is_dup:
                         for col_idx in range(1, ws.max_column + 1):
@@ -302,7 +299,6 @@ def remove_duplicates():
             if selected_column not in target_df.columns.astype(str).tolist():
                 return jsonify({"error": "Selected column not found"}), 400
 
-            # ensure matching actual column object
             actual_col = None
             for col in target_df.columns:
                 if str(col) == selected_column:
@@ -329,7 +325,6 @@ def remove_duplicates():
 
                 yellow_fill = PatternFill(start_color="FFF59D", end_color="FFF59D", fill_type="solid")
 
-                # find excel column number
                 selected_excel_col = None
                 for col_idx in range(1, ws.max_column + 1):
                     if str(ws.cell(row=1, column=col_idx).value) == selected_column:
@@ -342,14 +337,13 @@ def remove_duplicates():
 
                 wb.save(output_path)
 
-        # save history
         with engine.connect() as conn:
             conn.execute(
                 text("""
                     INSERT INTO tool_history (tool_name, original_file, output_file, user_email, user_name)
                     VALUES (:tool_name, :original_file, :output_file, :user_email, :user_name)
                 """),
-                {   
+                {
                     "tool_name": "Remove Duplicates",
                     "original_file": temp_file,
                     "output_file": output_name,
@@ -358,7 +352,6 @@ def remove_duplicates():
                 }
             )
             conn.commit()
-        
 
         storage_path = f"outputs/{output_name}"
         download_url = upload_file_to_supabase(
@@ -372,9 +365,10 @@ def remove_duplicates():
             "download_url": download_url
         })
 
-       except Exception as e:
-            print("remove_duplicates error:", str(e))
-            return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        print("remove_duplicates error:", str(e))
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/tool-history', methods=['GET'])
 def tool_history():
