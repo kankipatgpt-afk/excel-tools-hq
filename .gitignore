@@ -1,10 +1,14 @@
 # Environment files (VERY IMPORTANT)
 .env
 .env.local
+frontend/.env
+frontend/.env.local
 
 # Python
 venv/
 __pycache__/
+backend/venv/
+backend/__pycache__/
 
 # Backend temp files
 uploads/
@@ -13,11 +17,14 @@ outputs/
 # Node / frontend
 node_modules/
 .next/
+frontend/node_modules/
+frontend/.next/
 
 # OS files
 .DS_Store
 Thumbs.db
 
+# Misc
 *.zip
 temporarily.js
 frontend/7.5.0
