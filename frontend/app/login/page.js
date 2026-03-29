@@ -4,9 +4,8 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   const [mode, setMode] = useState("signin");
@@ -21,37 +20,22 @@ export default function LoginPage() {
   }, [status, router]);
 
   const handleEmailAuth = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (mode === "signup") {
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
+    if (mode === "signup") {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.error || "Signup failed");
-      return;
+      if (!res.ok) {
+        alert(data.error || "Signup failed");
+        return;
+      }
     }
-  }
-
-  const result = await signIn("credentials", {
-    email,
-    password,
-    callbackUrl: "/tools",
-    redirect: false,
-  });
-
-  if (result?.error) {
-    alert("Wrong email or password");
-    return;
-  }
-
-  window.location.href = result?.url || "/tools";
-};
 
     const result = await signIn("credentials", {
       email,
@@ -62,7 +46,7 @@ export default function LoginPage() {
 
     if (result?.error) {
       alert("Wrong email or password");
-    return;
+      return;
     }
 
     window.location.href = result?.url || "/tools";
