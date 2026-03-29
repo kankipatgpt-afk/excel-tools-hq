@@ -30,14 +30,6 @@ def get_supabase():
     return supabase
 
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
-
-# DATABASE CONFIG
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-
 def init_db():
     try:
         with engine.connect() as conn:
@@ -66,7 +58,7 @@ def init_db():
     except Exception as e:
         print("DB init skipped:", e)
 
-init_db()
+# init_db()
 
 UPLOAD_FOLDER = "uploads"
 OUTPUT_FOLDER = "outputs"
