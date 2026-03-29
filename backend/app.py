@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
-from supabase import create_client, Client
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from supabase import create_client
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from sqlalchemy import create_engine, text
 import pandas as pd
@@ -8,13 +8,26 @@ import os
 import uuid
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
+
 load_dotenv()
 
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "tool-files")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+
+supabase = None
+
+def get_supabase():
+    global supabase
+    if supabase is None:
+        supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    return supabase
 
 
 app = Flask(__name__)
@@ -23,11 +36,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # DATABASE CONFIG
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    connect_args={"sslmode": "require"}
-)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 def init_db():
     try:
@@ -69,13 +78,15 @@ def upload_file_to_supabase(local_path, storage_path, content_type="application/
     with open(local_path, "rb") as f:
         file_bytes = f.read()
 
-    supabase.storage.from_(SUPABASE_BUCKET).upload(
+    client = get_supabase()
+
+    client.storage.from_(SUPABASE_BUCKET).upload(
         path=storage_path,
         file=file_bytes,
         file_options={"content-type": content_type, "upsert": "true"},
     )
 
-    signed = supabase.storage.from_(SUPABASE_BUCKET).create_signed_url(storage_path, 3600)
+    signed = client.storage.from_(SUPABASE_BUCKET).create_signed_url(storage_path, 3600)
     return signed.get("signedURL") or signed.get("signed_url")
 
 
