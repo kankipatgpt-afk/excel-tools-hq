@@ -22,48 +22,57 @@ export default function RemoveDuplicatesPage() {
   const { data: session } = useSession();
 
   const handleFileUpload = async (uploadedFile) => {
-    if (!uploadedFile) return;
+  if (!uploadedFile) return;
 
-    setFile(uploadedFile);
-    setLoadingMeta(true);
-    setErrorMsg("");
-    setSuccessMsg("");
-    setSheets([]);
-    setSelectedSheet("");
-    setColumns([]);
-    setActionType("");
-    setMode("");
-    setSelectedColumn("");
+  setFile(uploadedFile);
+  setLoadingMeta(true);
+  setErrorMsg("");
+  setSuccessMsg("");
+  setSheets([]);
+  setSelectedSheet("");
+  setColumns([]);
+  setActionType("");
+  setMode("");
+  setSelectedColumn("");
 
-    const formData = new FormData();
-    formData.append("file", uploadedFile);
+  const formData = new FormData();
+  formData.append("file", uploadedFile);
 
+  try {
+    const response = await fetch("https://excel-tools-hq.onrender.com/excel-metadata", {
+      method: "POST",
+      body: formData,
+    });
+
+    const raw = await response.text();
+    console.log("Excel metadata status:", response.status);
+    console.log("Excel metadata raw response:", raw);
+
+    let data = {};
     try {
-      const response = await fetch("https://excel-tools-hq.onrender.com/excel-metadata", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMsg(data.error || "Failed to read Excel metadata");
-        setSuccessMsg("");
-        setLoadingMeta(false);
-        return;
-      }
-
-      setTempFile(data.temp_file);
-      setSheets(data.sheets);
-      setSuccessMsg("File uploaded successfully. Please choose a sheet.");
-    } catch (error) {
-      console.error(error);
-      setErrorMsg("Failed to upload file");
-      setSuccessMsg("");
+      data = JSON.parse(raw);
+    } catch {
+      data = { error: raw || "Non-JSON response from backend" };
     }
 
-    setLoadingMeta(false);
-  };
+    if (!response.ok) {
+      setErrorMsg(data.error || "Failed to read Excel metadata");
+      setSuccessMsg("");
+      setLoadingMeta(false);
+      return;
+    }
+
+    setTempFile(data.temp_file);
+    setSheets(data.sheets);
+    setSuccessMsg("File uploaded successfully. Please choose a sheet.");
+  } catch (error) {
+    console.error("Excel metadata upload error:", error);
+    setErrorMsg(error?.message || "Failed to upload file");
+    setSuccessMsg("");
+  }
+
+  setLoadingMeta(false);
+};
 
   const handleSheetChange = (sheetName) => {
     setSelectedSheet(sheetName);
@@ -74,90 +83,90 @@ export default function RemoveDuplicatesPage() {
   };
 
   const handleProcess = async () => {
-    if (!tempFile) {
-      setErrorMsg("Please upload a file");
-      setSuccessMsg("");
-      return;
-    }
-
-    if (!selectedSheet) {
-      setErrorMsg("Please select a sheet");
-      setSuccessMsg("");
-      return;
-    }
-
-    if (!actionType) {
-      setErrorMsg("Please select an action");
-      setSuccessMsg("");
-      return;
-    }
-
-    if (!mode) {
-      setErrorMsg("Please select Row or Column");
-      setSuccessMsg("");
-      return;
-    }
-
-    if (mode === "column" && !selectedColumn) {
-      setErrorMsg("Please select a column");
-      setSuccessMsg("");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("temp_file", tempFile);
-    formData.append("sheet_name", selectedSheet);
-    formData.append("action_type", actionType);
-    formData.append("mode", mode);
-
-    formData.append("user_email", session?.user?.email || "");
-    formData.append("user_name", session?.user?.name || "");
-
-    if (mode === "column") {
-      formData.append("selected_column", selectedColumn);
-    }
-
-    setProcessing(true);
-    setErrorMsg("");
+  if (!tempFile) {
+    setErrorMsg("Please upload a file");
     setSuccessMsg("");
+    return;
+  }
 
+  if (!selectedSheet) {
+    setErrorMsg("Please select a sheet");
+    setSuccessMsg("");
+    return;
+  }
+
+  if (!actionType) {
+    setErrorMsg("Please select an action");
+    setSuccessMsg("");
+    return;
+  }
+
+  if (!mode) {
+    setErrorMsg("Please select Row or Column");
+    setSuccessMsg("");
+    return;
+  }
+
+  if (mode === "column" && !selectedColumn) {
+    setErrorMsg("Please select a column");
+    setSuccessMsg("");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("temp_file", tempFile);
+  formData.append("sheet_name", selectedSheet);
+  formData.append("action_type", actionType);
+  formData.append("mode", mode);
+  formData.append("user_email", session?.user?.email || "");
+  formData.append("user_name", session?.user?.name || "");
+
+  if (mode === "column") {
+    formData.append("selected_column", selectedColumn);
+  }
+
+  setProcessing(true);
+  setErrorMsg("");
+  setSuccessMsg("");
+
+  try {
+    const response = await fetch("https://excel-tools-hq.onrender.com/remove-duplicates", {
+      method: "POST",
+      body: formData,
+    });
+
+    const raw = await response.text();
+    console.log("Remove duplicates status:", response.status);
+    console.log("Remove duplicates raw response:", raw);
+
+    let data = {};
     try {
-      const response = await fetch("https://excel-tools-hq.onrender.com/remove-duplicates", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErrorMsg(errorData.error || "Processing failed");
-        setSuccessMsg("");
-        setProcessing(false);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMsg(data.error || "Processing failed");
-        setSuccessMsg("");
-        setProcessing(false);
-        return;
-      }
-
-      if (data.download_url) {
-        window.open(data.download_url, "_blank");
-      }
-
-      setSuccessMsg("File processed and download link generated successfully.");
-      setErrorMsg("");
-    } catch (error) {
-      console.error(error);
-      setErrorMsg("Processing failed");
-      setSuccessMsg("");
+      data = JSON.parse(raw);
+    } catch {
+      data = { error: raw || "Non-JSON response from backend" };
     }
 
-    setProcessing(false);
-  };
+    if (!response.ok) {
+      setErrorMsg(data.error || "Processing failed");
+      setSuccessMsg("");
+      setProcessing(false);
+      return;
+    }
+
+    if (data.download_url) {
+      window.open(data.download_url, "_blank");
+    }
+
+    setSuccessMsg("File processed and download link generated successfully.");
+    setErrorMsg("");
+  } catch (error) {
+    console.error("Remove duplicates error:", error);
+    setErrorMsg(error?.message || "Processing failed");
+    setSuccessMsg("");
+  }
+
+  setProcessing(false);
+};
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-16">

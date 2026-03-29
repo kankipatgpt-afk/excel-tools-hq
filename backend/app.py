@@ -143,7 +143,7 @@ def trim_spaces():
         cleaned_sheets = {}
 
         for sheet_name, df in excel_data.items():
-            cleaned_df = df.map(clean_extra_spaces)
+            cleaned_df = df.apply(lambda col: col.map(clean_extra_spaces))
             cleaned_sheets[sheet_name] = cleaned_df
 
         # Write back all sheets
@@ -184,6 +184,7 @@ def trim_spaces():
         })
 
     except Exception as e:
+        print("trim_spaces error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -371,8 +372,9 @@ def remove_duplicates():
             "download_url": download_url
         })
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500   
+       except Exception as e:
+            print("remove_duplicates error:", str(e))
+            return jsonify({"error": str(e)}), 500
 
 @app.route('/tool-history', methods=['GET'])
 def tool_history():
@@ -406,6 +408,7 @@ def tool_history():
 
 
 
+@app.route('/download-output/<filename>', methods=['GET'])
 def download_output(filename):
     try:
         return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)

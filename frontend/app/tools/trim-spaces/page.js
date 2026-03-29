@@ -32,10 +32,19 @@ export default function TrimSpacesPage() {
       body: formData,
     });
 
-    const data = await response.json();
+    const raw = await response.text();
+    console.log("Trim Spaces status:", response.status);
+    console.log("Trim Spaces raw response:", raw);
+
+    let data = {};
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = { error: raw || "Non-JSON response from backend" };
+    }
 
     if (!response.ok) {
-      setErrorMsg(data.error || "Something went wrong.");
+      setErrorMsg(data.error || `Request failed with status ${response.status}`);
       setLoading(false);
       return;
     }
@@ -46,8 +55,8 @@ export default function TrimSpacesPage() {
 
     setSuccessMsg("File processed and download link generated successfully.");
   } catch (error) {
-    console.error(error);
-    setErrorMsg("Upload failed. Please try again.");
+    console.error("Trim Spaces upload error:", error);
+    setErrorMsg(error?.message || "Upload failed. Please try again.");
   }
 
   setLoading(false);
