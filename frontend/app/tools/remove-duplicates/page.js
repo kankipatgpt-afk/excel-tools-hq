@@ -39,7 +39,7 @@ export default function RemoveDuplicatesPage() {
     formData.append("file", uploadedFile);
 
     try {
-      const response = await fetch("http://localhost:5000/excel-metadata", {
+      const response = await fetch("https://excel-tools-hq.onrender.com/excel-metadata", {
         method: "POST",
         body: formData,
       });
@@ -122,7 +122,7 @@ export default function RemoveDuplicatesPage() {
     setSuccessMsg("");
 
     try {
-      const response = await fetch("http://localhost:5000/remove-duplicates", {
+      const response = await fetch("https://excel-tools-hq.onrender.com/remove-duplicates", {
         method: "POST",
         body: formData,
       });

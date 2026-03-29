@@ -36,7 +36,7 @@ export default function DashboardPage() {
 
   const fetchHistory = async () => {
     try {
-      const response = await fetch("http://localhost:5000/tool-history");
+      const response = await fetch("https://excel-tools-hq.onrender.com/tool-history");
       const data = await response.json();
 
       if (!response.ok) {
@@ -170,7 +170,7 @@ export default function DashboardPage() {
 
                     <td className="px-6 py-4">
                       <a
-                        href={`http://localhost:5000/download-output/${item.output_file}`}
+                        href={`https://excel-tools-hq.onrender.com/download-output/${item.output_file}`}
                         className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                       >
                         Download

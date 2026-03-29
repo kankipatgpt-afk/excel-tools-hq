@@ -27,7 +27,7 @@ export default function TrimSpacesPage() {
   setSuccessMsg("");
 
   try {
-    const response = await fetch("http://localhost:5000/trim-spaces", {
+    const response = await fetch("https://excel-tools-hq.onrender.com/trim-spaces", {
       method: "POST",
       body: formData,
     });
