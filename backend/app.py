@@ -151,6 +151,17 @@ def trim_spaces():
                 cleaned_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
         # Save tool history
+        print("Step 1: Excel cleaned successfully")
+
+        print("Step 2: Saving tool history to database")
+                with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+            for sheet_name, df in excel_data.items():
+                cleaned_df = df.apply(lambda col: col.map(clean_extra_spaces))
+                cleaned_df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+        print("Step 1: Excel cleaned successfully")
+
+        print("Step 2: Saving tool history to database")
         with engine.connect() as conn:
             conn.execute(
                 text("""
@@ -166,16 +177,16 @@ def trim_spaces():
                 }
             )
             conn.commit()
+        print("Step 3: Database save successful")
 
-
-        
-
+        print("Step 4: Uploading output file to Supabase")
         storage_path = f"outputs/{output_name}"
         download_url = upload_file_to_supabase(
             output_path,
             storage_path,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+        print("Step 5: Supabase upload successful")
 
         return jsonify({
             "message": "File processed successfully",
