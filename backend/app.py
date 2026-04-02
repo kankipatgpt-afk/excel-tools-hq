@@ -12,12 +12,16 @@ from openpyxl.styles import PatternFill
 load_dotenv()
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB limit
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "tool-files")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is missing")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
@@ -58,10 +62,11 @@ def init_db():
     except Exception as e:
         print("DB init skipped:", e)
 
-# init_db()
+ init_db()
 
-UPLOAD_FOLDER = "uploads"
-OUTPUT_FOLDER = "outputs"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+OUTPUT_FOLDER = os.path.join(BASE_DIR, "outputs")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -140,15 +145,9 @@ def trim_spaces():
         # Read all sheets
         excel_data = pd.read_excel(input_path, sheet_name=None)
 
-        cleaned_sheets = {}
-
-        for sheet_name, df in excel_data.items():
-            cleaned_df = df.apply(lambda col: col.map(clean_extra_spaces))
-            cleaned_sheets[sheet_name] = cleaned_df
-
-        # Write back all sheets
-        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
-            for sheet_name, cleaned_df in cleaned_sheets.items():
+        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:      
+            for sheet_name, df in excel_data.items():
+                cleaned_df = df.apply(lambda col: col.map(clean_extra_spaces))
                 cleaned_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
         # Save tool history

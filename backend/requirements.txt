@@ -1,9 +1,10 @@
-flask
+Flask
 flask-cors
-sqlalchemy
-psycopg2-binary
+python-dotenv
+supabase
+SQLAlchemy
 pandas
 openpyxl
 gunicorn
-python-dotenv
-supabase
+psycopg2-binary
+xlrd
