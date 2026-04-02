@@ -152,22 +152,25 @@ def trim_spaces():
         print("Step 1: Excel cleaned successfully")
 
         print("Step 2: Saving tool history to database")
-        with engine.connect() as conn:
-            conn.execute(
-                text("""
-                    INSERT INTO tool_history (tool_name, original_file, output_file, user_email, user_name)
-                    VALUES (:tool_name, :original_file, :output_file, :user_email, :user_name)
-                """),
-                {
-                    "tool_name": "Trim Spaces",
-                    "original_file": file.filename,
-                    "output_file": output_name,
-                    "user_email": user_email,
-                    "user_name": user_name
-                }
-            )
-            conn.commit()
-        print("Step 3: Database save successful")
+        try:
+            with engine.connect() as conn:
+                conn.execute(
+                    text("""
+                        INSERT INTO tool_history (tool_name, original_file, output_file, user_email, user_name)
+                        VALUES (:tool_name, :original_file, :output_file, :user_email, :user_name)
+                    """),
+                    {
+                        "tool_name": "Trim Spaces",
+                        "original_file": file.filename,
+                        "output_file": output_name,
+                        "user_email": user_email,
+                        "user_name": user_name
+                    }
+                )
+                conn.commit()
+            print("Step 3: Database save successful")
+        except Exception as db_error:
+            print("Database save failed:", str(db_error))
 
         print("Step 4: Uploading output file to Supabase")
         storage_path = f"outputs/{output_name}"
