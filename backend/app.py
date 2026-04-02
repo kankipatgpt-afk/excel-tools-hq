@@ -77,14 +77,28 @@ def upload_file_to_supabase(local_path, storage_path, content_type="application/
 
     client = get_supabase()
 
-    client.storage.from_(SUPABASE_BUCKET).upload(
-        path=storage_path,
-        file=file_bytes,
-        file_options={"content-type": content_type, "upsert": "true"},
-    )
+    print("Uploading to bucket:", SUPABASE_BUCKET)
+    print("Storage path:", storage_path)
+    print("Supabase URL:", SUPABASE_URL)
 
-    signed = client.storage.from_(SUPABASE_BUCKET).create_signed_url(storage_path, 3600)
-    return signed.get("signedURL") or signed.get("signed_url")
+    try:
+        response = client.storage.from_(SUPABASE_BUCKET).upload(
+            path=storage_path,
+            file=file_bytes,
+            file_options={"content-type": content_type}
+        )
+        print("Upload response:", response)
+    except Exception as e:
+        print("UPLOAD ERROR:", str(e))
+        raise
+
+    try:
+        signed = client.storage.from_(SUPABASE_BUCKET).create_signed_url(storage_path, 3600)
+        print("SIGNED URL RESPONSE:", signed)
+        return signed.get("signedURL") or signed.get("signed_url")
+    except Exception as e:
+        print("SIGNED URL ERROR:", str(e))
+        raise
 
 
 @app.route('/')
@@ -378,6 +392,29 @@ def download_output(filename):
         return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 404
+    
+@app.route('/test-upload')
+def test_upload():
+    try:
+        test_file = "test.txt"
+        test_path = os.path.join(UPLOAD_FOLDER, test_file)
+
+        with open(test_path, "w") as f:
+            f.write("hello from render")
+
+        url = upload_file_to_supabase(
+            test_path,
+            "test/test.txt",
+            content_type="text/plain"
+        )
+
+        return jsonify({
+            "message": "Test upload successful",
+            "url": url
+        })
+    except Exception as e:
+        print("test_upload error:", str(e))
+        return jsonify({"error": str(e)}), 500   
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
