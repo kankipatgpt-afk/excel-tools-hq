@@ -148,18 +148,9 @@ def trim_spaces():
 
         print("Step 1: Excel cleaned successfully")
 
-        print("Step 4: Uploading output file to Supabase")
-        storage_path = f"outputs/{output_name}"
-        download_url = upload_file_to_supabase(
-            output_path,
-            storage_path,
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        print("Step 5: Supabase upload successful")
-
         return jsonify({
             "message": "File processed successfully",
-            "download_url": download_url
+            "filename": output_name
         })
 
     except Exception as e:
