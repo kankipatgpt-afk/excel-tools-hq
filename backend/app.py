@@ -62,7 +62,7 @@ def init_db():
     except Exception as e:
         print("DB init skipped:", e)
 
- init_db()
+init_db()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
