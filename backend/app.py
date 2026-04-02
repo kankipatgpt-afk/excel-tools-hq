@@ -62,7 +62,7 @@ def init_db():
     except Exception as e:
         print("DB init skipped:", e)
 
-init_db()
+# init_db()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
@@ -123,9 +123,6 @@ def trim_spaces():
 
     file = request.files['file']
 
-    user_email = request.form.get("user_email", "")
-    user_name = request.form.get("user_name", "")
-
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
 
@@ -150,27 +147,6 @@ def trim_spaces():
                 cleaned_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
         print("Step 1: Excel cleaned successfully")
-
-        print("Step 2: Saving tool history to database")
-        try:
-            with engine.connect() as conn:
-                conn.execute(
-                    text("""
-                        INSERT INTO tool_history (tool_name, original_file, output_file, user_email, user_name)
-                        VALUES (:tool_name, :original_file, :output_file, :user_email, :user_name)
-                    """),
-                    {
-                        "tool_name": "Trim Spaces",
-                        "original_file": file.filename,
-                        "output_file": output_name,
-                        "user_email": user_email,
-                        "user_name": user_name
-                    }
-                )
-                conn.commit()
-            print("Step 3: Database save successful")
-        except Exception as db_error:
-            print("Database save failed:", str(db_error))
 
         print("Step 4: Uploading output file to Supabase")
         storage_path = f"outputs/{output_name}"
