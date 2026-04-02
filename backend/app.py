@@ -142,19 +142,9 @@ def trim_spaces():
     file.save(input_path)
 
     try:
-        # Read all sheets
         excel_data = pd.read_excel(input_path, sheet_name=None)
 
-        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:      
-            for sheet_name, df in excel_data.items():
-                cleaned_df = df.apply(lambda col: col.map(clean_extra_spaces))
-                cleaned_df.to_excel(writer, sheet_name=sheet_name, index=False)
-
-        # Save tool history
-        print("Step 1: Excel cleaned successfully")
-
-        print("Step 2: Saving tool history to database")
-                with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
             for sheet_name, df in excel_data.items():
                 cleaned_df = df.apply(lambda col: col.map(clean_extra_spaces))
                 cleaned_df.to_excel(writer, sheet_name=sheet_name, index=False)
