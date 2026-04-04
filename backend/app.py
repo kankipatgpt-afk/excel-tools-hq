@@ -151,7 +151,7 @@ def trim_spaces():
     unique_name = f"{uuid.uuid4()}_{file.filename}"
     input_path = os.path.join(UPLOAD_FOLDER, unique_name)
 
-    output_name = f"trimmed_{file.filename}"
+    output_name = f"trimmed_{uuid.uuid4()}_{file.filename}"
     output_path = os.path.join(OUTPUT_FOLDER, output_name)
 
     file.save(input_path)
@@ -253,7 +253,7 @@ def remove_duplicates():
         return jsonify({"error": "Uploaded temp file not found"}), 400
 
     original_name = temp_file.split("_", 1)[1] if "_" in temp_file else temp_file
-    output_name = f"dedup_{original_name}"
+    output_name = f"dedup_{uuid.uuid4()}_{original_name}"
     output_path = os.path.join(OUTPUT_FOLDER, output_name)
 
     try:
