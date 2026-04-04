@@ -20,7 +20,7 @@ SUPABASE_URL = "https://dxakegsxuugwxxkuoewt.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "tool-files")
 
-
+print("FORCE TEST SUPABASE_URL:", SUPABASE_URL)
 print("Startup SUPABASE_BUCKET:", SUPABASE_BUCKET)
 print("Has service role key:", bool(SUPABASE_SERVICE_ROLE_KEY))
 
