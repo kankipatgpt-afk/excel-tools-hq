@@ -18,6 +18,7 @@ export default function RemoveDuplicatesPage() {
   const [processing, setProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [downloadUrl, setDownloadUrl] = useState("");
 
   const { data: session } = useSession();
 
@@ -34,6 +35,7 @@ export default function RemoveDuplicatesPage() {
   setActionType("");
   setMode("");
   setSelectedColumn("");
+  setDownloadUrl("");
 
   const formData = new FormData();
   formData.append("file", uploadedFile);
@@ -128,6 +130,7 @@ export default function RemoveDuplicatesPage() {
   setProcessing(true);
   setErrorMsg("");
   setSuccessMsg("");
+  setDownloadUrl("");
 
   try {
     const response = await fetch("https://excel-tools-hq.onrender.com/remove-duplicates", {
@@ -154,11 +157,13 @@ export default function RemoveDuplicatesPage() {
     }
 
     if (data.download_url) {
-      window.open(data.download_url, "_blank");
+      setDownloadUrl(data.download_url);
+      setSuccessMsg("File processed successfully. Click the download button.");
+      setErrorMsg("");
+    } else {
+      setErrorMsg("File processed but no download link was returned.");
+      setSuccessMsg("");
     }
-
-    setSuccessMsg("File processed and download link generated successfully.");
-    setErrorMsg("");
   } catch (error) {
     console.error("Remove duplicates error:", error);
     setErrorMsg(error?.message || "Processing failed");
@@ -313,24 +318,50 @@ export default function RemoveDuplicatesPage() {
         )}
 
         {(mode === "row" || (mode === "column" && selectedColumn)) && (
-          <button
-            onClick={handleProcess}
-            disabled={processing || loadingMeta}
-            className={`inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg text-white min-w-[180px] ${
-              processing || loadingMeta
-                ? "bg-slate-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {processing ? (
-              <>
-                <span className="spinner"></span>
-                Processing...
-              </>
-            ) : (
-              "Process File"
-            )}
-          </button>
+          <div>
+            <button
+              onClick={handleProcess}
+              disabled={processing || loadingMeta}
+              className={`inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg text-white min-w-[180px] ${
+                processing || loadingMeta
+                  ? "bg-slate-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              {processing ? (
+                <>
+                  <span className="spinner"></span>
+                  Processing...
+                </>
+              ) : (
+                "Process File"
+              )}
+            </button>
+
+            <div className="mt-6">
+              <button
+                type="button"
+                disabled={!downloadUrl || processing || loadingMeta}
+                onClick={() => {
+                  if (downloadUrl) {
+                    const link = document.createElement("a");
+                    link.href = downloadUrl;
+                    link.download = "";
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                  }
+                }}
+                className={`inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg text-white min-w-[220px] ${
+                  !downloadUrl || processing || loadingMeta
+                    ? "bg-slate-400 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
+              >
+                Download Processed File
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
