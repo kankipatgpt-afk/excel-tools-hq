@@ -9,7 +9,7 @@ import uuid
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 
-load_dotenv()
+load_dotenv(override=False)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB limit
@@ -19,6 +19,10 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "tool-files")
+
+print("Startup SUPABASE_URL:", SUPABASE_URL)
+print("Startup SUPABASE_BUCKET:", SUPABASE_BUCKET)
+print("Has service role key:", bool(SUPABASE_SERVICE_ROLE_KEY))
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL is missing")
