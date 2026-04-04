@@ -16,11 +16,11 @@ app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB limit
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_URL = "https://dxakegsxuugwxxkuoewt.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "tool-files")
 
-print("Startup SUPABASE_URL:", SUPABASE_URL)
+print("FORCE TEST SUPABASE_URL:", SUPABASE_URL)
 print("Startup SUPABASE_BUCKET:", SUPABASE_BUCKET)
 print("Has service role key:", bool(SUPABASE_SERVICE_ROLE_KEY))
 
